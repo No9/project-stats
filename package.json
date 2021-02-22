@@ -1,0 +1,28 @@
+{
+  "name": "project-stats",
+  "version": "1.0.0",
+  "description": "A script to pull stats from github projects",
+  "main": "read.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "start": "node read.js",
+    "test": "node tests/test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/No9/project-stats.git"
+  },
+  "keywords": [
+    "stats",
+    "github",
+    "contributions"
+  ],
+  "author": "anton whalley",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/No9/project-stats/issues"
+  },
+  "homepage": "https://github.com/No9/project-stats#readme"
+}
