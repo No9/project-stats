@@ -23,7 +23,7 @@ function processuser(curproj, curuser) {
             var orgs = JSON.parse(str);
             for(var j = 0; j < orgs.length; j++) {
                 if(orgs[j]) {
-                    console.log(curproj + ',' + curuser + ',' + orgs[j].login + '\n');
+                    console.log(curproj + ',' + curuser + ',' + orgs[j].login);
                 } 
                 // else {
                 //     console.log(curproj + " " + curuser + " " + orgs.length)

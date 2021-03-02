@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Community Overview</title>
+        <meta name="description" content="">
+        <meta name="author" content="">
+      
+        <!-- Mobile Specific Metas
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+      
+        <!-- FONT
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+      
+        <!-- CSS
+        –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+        <link rel="stylesheet" href="css/normalize.css">
+        <link rel="stylesheet" href="css/skeleton.css">
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+              <h1>Community Overview</h1>
+            </div>
+            <form>
+            <div class="row">
+                <label for="exampleEmailInput">Project Name</label>
+                <input type="text" name="txtProject" id="txtProject" placeholder="expressjs/express"/>&nbsp;
+                <input type="button" value="Run" onclick="render()" class="button-primary"/>
+            </div>
+        </form>
+        <div class="row">
+            <div id="canvas-holder" style="width:100%">
+                <canvas id="contributor-ratio"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            
+        </div>
+        <div class="row" id="ratio-evaluation">
+        </div>
+        <div class="row" id="external-influence">
+        </div>
+        
+        </div><!--End of container--> 
+        
+        
+        
+    <script src="./js/Chart.min.js"></script>
+    <script>
+        function render() {
+        var project = document.getElementsByName('txtProject')[0].value;     
+        fetch('https://api.github.com/repos/' + project + '/contributors')
+        .then(response => response.json())
+        .then(data => {
+            var ctx = document.getElementById('contributor-ratio');
+            var labels = [];
+            var contribs = [];
+            var samplesize = 10;
+            for (var i=0; i < data.length; i++) {
+                if (i == samplesize) break;
+                if (data[i].login.indexOf("greenkeeper") > -1) {
+                    samplesize = samplesize + 1;
+                } else {
+                    labels.push(data[i].login);
+                    contribs.push(data[i].contributions);                
+                }
+            }
+            var myChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '# of Commits',
+                    data: contribs,
+                    backgroundColor: [
+                        'rgba(239, 62, 91, 0.2)',
+                        'rgba(75, 37, 109, 0.2)',
+                        'rgba(63, 100, 126, 0.2)',
+                        'rgba(0, 176, 178, 0.2)',
+                        'rgba(149, 212, 122, 0.2)',
+                        'rgba(103, 124, 138, 0.2)',
+                        'rgba(111, 84, 149, 0.2)',
+                        'rgba(242, 98, 121, 0.2)',
+                        'rgba(246, 143, 160, 0.2)',
+                        'rgba(201, 201, 201, 0.2)'
+                    ],
+                    borderColor: [
+                    'rgba(239, 62, 91, 1)',
+                        'rgba(75, 37, 109, 1)',
+                        'rgba(63, 100, 126, 1)',
+                        'rgba(0, 176, 178, 1)',
+                        'rgba(149, 212, 122, 1)',
+                        'rgba(103, 124, 138, 1)',
+                        'rgba(111, 84, 149, 1)',
+                        'rgba(242, 98, 121, 1)',
+                        'rgba(246, 143, 160, 1)',
+                        'rgba(201, 201, 201, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+        });
+            // Core Project Membership
+            var orgs = [];
+            var counter = 1;
+            var userlength = data.length;
+            var calls = [];
+            for (i = 0; i < labels.length; i++) {
+                var call = fetch('https://api.github.com/users/' + labels[i] + '/orgs')
+                calls.push(call);    
+            }
+
+            Promise.all(calls).then(function (responses) {
+                // Get a JSON object from each of the responses
+                return Promise.all(responses.map(function (response) {
+                    return response.json();
+                }));
+            }).then(function (data) {
+                var info = processorgs(data);
+                document.getElementById("ratio-evaluation").innerHTML=`
+                <h4><img src="${info[project.split('/')[0]].avatar_url} alt="${project.split('/')[0]}" style="width:32px; height:32px"/> 
+                Contributor Membership: ${info[project.split('/')[0]].count / 10 * 100}%</h4>
+                `
+                delete info[project.split('/')[0]];
+                var sortable = [];
+                for (var org in info) {
+                    sortable.push([org, info[org].count, info[org].avatar_url]);
+                }
+                sortable.sort(function(a, b) {
+                    return b[1] - a[1];
+                }); 
+                var influencers = '<h4>Influencing Organisations</h4>';
+                for(s=0; s < sortable.length; s++) {
+                    influencers += `<div class="one column">
+                    <img src="${sortable[s][2]} alt="${sortable[s][0]}" style="width:32px; height:32px"/> 
+                    ${sortable[s][0] + ' ' + sortable[s][1]}</div>
+                    `
+                    if(s == 10) break;
+                }
+                document.getElementById("external-influence").innerHTML=influencers
+                console.log(sortable);
+            }).catch(function (error) {
+                // if there's an error, log it
+                console.log(error);
+            });
+        
+    });
+}
+    function processorgs(orgs) {
+        var retval = {};
+        for(i = 0; i < orgs.length; i++){
+            for(j = 0; j < orgs[i].length; j++) {
+                if (retval[orgs[i][j].login]) {
+                    retval[orgs[i][j].login].count = retval[orgs[i][j].login].count + 1
+                } else {
+                    var org = { 
+                        count : 1,
+                        avatar_url : orgs[i][j].avatar_url
+                    }
+                    retval[orgs[i][j].login] = org; 
+                }
+            }
+        }
+        return retval;
+    }
+
+        
+        </script>
+    </body>
+</html>
