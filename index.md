@@ -51,7 +51,11 @@
     <script src="./js/Chart.min.js"></script>
     <script>
         function render() {
-        var project = document.getElementsByName('txtProject')[0].value;     
+        var project = document.getElementsByName('txtProject')[0].value; 
+        if (project == '') { 
+            document.getElementsByName('txtProject')[0].value = 'expressjs/express';
+            project = 'expressjs/express';
+        }
         fetch('https://api.github.com/repos/' + project + '/contributors')
         .then(response => response.json())
         .then(data => {
