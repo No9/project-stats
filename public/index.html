@@ -41,6 +41,7 @@
         </div>
         <div class="row" id="ratio-evaluation">
         </div>
+        
         <div class="row" id="external-influence">
         </div>
         
@@ -67,6 +68,14 @@
                 if (i == samplesize) break;
                 if (data[i].login.indexOf("greenkeeper") > -1) {
                     samplesize = samplesize + 1;
+                } else if (data[i].login.indexOf("snyk-bot") > -1) {
+                        samplesize = samplesize + 1;
+                } else if (data[i].login.indexOf("github-actions") > -1) {
+                        samplesize = samplesize + 1;
+                } else if (data[i].login.indexOf("dependabot") > -1) {
+                        samplesize = samplesize + 1;
+                } else if (data[i].login.indexOf("renovate-bot") > -1) {
+                        samplesize = samplesize + 1;
                 } else {
                     labels.push(data[i].login);
                     contribs.push(data[i].contributions);                
@@ -106,6 +115,12 @@
                     borderWidth: 1
                 }]
             },
+            options: {
+					responsive: true,
+					legend: {
+						position: "left",
+					},
+                }
         });
             // Core Project Membership
             var orgs = [];
@@ -136,16 +151,28 @@
                 sortable.sort(function(a, b) {
                     return b[1] - a[1];
                 }); 
-                var influencers = '<h4>Influencing Organisations</h4>';
-                for(s=0; s < sortable.length; s++) {
-                    influencers += `<div class="one column">
-                    <img src="${sortable[s][2]} alt="${sortable[s][0]}" style="width:32px; height:32px"/> 
-                    ${sortable[s][0] + ' ' + sortable[s][1]}</div>
-                    `
-                    if(s == 10) break;
+                
+                var externalrows = document.getElementsByClassName('external-influence-row');
+
+                while (externalrows[0]) {
+                    externalrows[0].parentNode.removeChild(externalrows[0]);
+                } 
+                
+                var influencers = '<h4 class="row external-influence-row">Influencing Organisations</h4><div class="row" id="external-influence">';
+                    
+                    for(s=0; s < sortable.length; s++) {
+                    if(s % 6 == 0 && s !== 0) {
+                        influencers += '</div><div class="row external-influence-row">';
+                    }
+                    influencers += `<div class="one column" style="width:60px">
+                    <img src="${sortable[s][2]}" alt="${sortable[s][0]}" style="width:32px; height:32px"/> 
+                    <br/>${sortable[s][0] + '<br/>' + sortable[s][1]}
+                    </div>`
+
                 }
-                document.getElementById("external-influence").innerHTML=influencers
-                console.log(sortable);
+                influencers += '</div>';
+                document.getElementById("external-influence").outerHTML=influencers;
+                
             }).catch(function (error) {
                 // if there's an error, log it
                 console.log(error);
