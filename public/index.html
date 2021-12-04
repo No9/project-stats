@@ -42,7 +42,7 @@
         <div class="row" id="ratio-evaluation">
         </div>
         
-        <div class="row" id="external-influence">
+        <div class="row" id="external-organization">
         </div>
         
         </div><!--End of container--> 
@@ -150,28 +150,27 @@
                 }
                 sortable.sort(function(a, b) {
                     return b[1] - a[1];
-                }); 
-                
-                var externalrows = document.getElementsByClassName('external-influence-row');
+                });
+                var externalrows = document.getElementsByClassName('external-organization-row');
 
                 while (externalrows[0]) {
                     externalrows[0].parentNode.removeChild(externalrows[0]);
                 } 
                 
-                var influencers = '<h4 class="row external-influence-row">Influencing Organisations</h4><div class="row" id="external-influence">';
+                var exorgs = '<h4 class="row external-organization-row">Contributors Aggregated by Organization</h4><div class="row" id="external-organization">';
                     
                     for(s=0; s < sortable.length; s++) {
                     if(s % 6 == 0 && s !== 0) {
-                        influencers += '</div><div class="row external-influence-row">';
+                        exorgs += '</div><div class="row external-organization-row">';
                     }
-                    influencers += `<div class="one column" style="width:60px">
+                    exorgs += `<div class="one column" style="width:60px">
                     <img src="${sortable[s][2]}" alt="${sortable[s][0]}" style="width:32px; height:32px"/> 
                     <br/>${sortable[s][0] + '<br/>' + sortable[s][1]}
                     </div>`
 
                 }
-                influencers += '</div>';
-                document.getElementById("external-influence").outerHTML=influencers;
+                exorgs += '</div>';
+                document.getElementById("external-organization").outerHTML=exorgs;
                 
             }).catch(function (error) {
                 // if there's an error, log it
