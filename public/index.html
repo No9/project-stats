@@ -2,9 +2,13 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
+        <meta name="twitter:title" content="Open Source Community Overview">
+        <meta name="twitter:description" content="Summary of the top 10 contributors to a project.">
+        <meta name="twitter:image" content="https://project-stats.netlify.app/img/preview.png">
+        <meta name="twitter:card" content="summary_large_image">
         <title>Community Overview</title>
-        <meta name="description" content="">
-        <meta name="author" content="">
+        <meta name="description" content="A tool for analysing the top 10 contributors to a project">
+        <meta name="author" content="Anton Whalley">
         <!-- Mobile Specific Metas
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -27,6 +31,7 @@
                 <input type="text" name="txtProject" id="txtProject" placeholder="expressjs/express"/>&nbsp;
                 <input type="button" value="Run" onclick="render()" class="button-primary"/>
                 <h5>Based on Top 10 Contributors</h5>
+                <div id="permalink"></div>
             </div>
         </form>
         <div class="row">
@@ -46,12 +51,22 @@
 
     <script src="./js/Chart.min.js"></script>
     <script>
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        if (urlParams.get('p') !== '') {
+            document.getElementsByName('txtProject')[0].value = urlParams.get('p');
+            render();
+        }
         function render() {
         var project = document.getElementsByName('txtProject')[0].value;
         if (project == '') {
             document.getElementsByName('txtProject')[0].value = 'expressjs/express';
             project = 'expressjs/express';
         }
+        var localurl = location.protocol + '//' + location.host + location.pathname + `?p=` + project;
+        document.getElementById("permalink").innerHTML = `Permalink: <a href="${localurl}">${localurl}</a>`;
+
         fetch('https://api.github.com/repos/' + project + '/contributors')
         .then(response => response.json())
         .then(data => {
