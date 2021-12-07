@@ -166,7 +166,7 @@
                                 <div class="row" id="external-organization">
                                 <table><thead>
                                     <tr>
-                                    <th>Logo</th><th>Name</th><th>Contributors</th><th>Total</th>
+                                    <th colspan="2">Organisation</th><th>Contributors</th><th>Total</th>
                                     </tr>
                                 </thead>
                                 `;
@@ -186,12 +186,14 @@
                                 <div class="row" id="contrib-organization">
                                 <table><thead>
                                     <tr>
-                                    <th>Contributor</th><th>Organisation</th><th>Total</th>
+                                    <th colspan="2">Contributor</th><th>Organisation</th><th>Total</th>
                                     </tr>
                                 </thead>
                                 `;
                     for(s=0; s < data.length; s++) {
-                    contorgs += `<tr><td>${data[s].userid}</td><td>`;
+                    contorgs += `<tr><td><img src="https://github.com/${data[s].userid}.png?size=32" alt="${data[s].userid}"/></td>
+                    <td>${data[s].userid}</td>
+                    <td>`;
                     contcounter = 0
                     for (t in data[s]) {
                         if (data[s][t].login) {
@@ -199,7 +201,7 @@
                             contorgs += `${data[s][t].login} `
                         }
                     }
-                    
+
                     contorgs += `</td><td>${contcounter}</td></tr>`
                 }
                 contorgs += '</table></div>';
@@ -216,7 +218,6 @@
         var retval = {};
         for(i = 0; i < orgs.length; i++){
             for(j = 0; j < orgs[i].length; j++) {
-                
                 if (retval[orgs[i][j].login]) {
                     retval[orgs[i][j].login].count = retval[orgs[i][j].login].count + 1
                     retval[orgs[i][j].login].userids.push(orgs[i].userid)
