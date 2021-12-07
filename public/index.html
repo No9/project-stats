@@ -19,8 +19,16 @@
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/skeleton.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-fork-ribbon-css/0.2.3/gh-fork-ribbon.min.css" />
+        <style>
+        .github-fork-ribbon:before {
+            background-color: #333;
+        }
+        </style>
     </head>
     <body>
+    
+    <a class="github-fork-ribbon" href="https://github.com/No9/project-stats" data-ribbon="Fork me on GitHub" title="Fork me on GitHub">Fork me on GitHub</a>
         <div class="container">
             <div class="row">
               <h1>Community Overview</h1>
@@ -54,7 +62,7 @@
         const queryString = window.location.search;
         const urlParams = new URLSearchParams(queryString);
 
-        if (urlParams.get('p') !== '') {
+        if (urlParams.get('p') !== null) {
             document.getElementsByName('txtProject')[0].value = urlParams.get('p');
             render();
         }
