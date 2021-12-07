@@ -198,7 +198,8 @@
                     for (t in data[s]) {
                         if (data[s][t].login) {
                             contcounter++;
-                            contorgs += `${data[s][t].login} `
+                            // contorgs += `${data[s][t].login} `
+                            contorgs += `<img src="https://github.com/${data[s][t].login}.png?size=32" style="width:32px; height:32px"  title="${data[s][t].login}" alt="${data[s][t].login}"/>`
                         }
                     }
 
