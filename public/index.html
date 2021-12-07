@@ -5,15 +5,12 @@
         <title>Community Overview</title>
         <meta name="description" content="">
         <meta name="author" content="">
-      
         <!-- Mobile Specific Metas
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <meta name="viewport" content="width=device-width, initial-scale=1">
-      
         <!-- FONT
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
-      
         <!-- CSS
         –––––––––––––––––––––––––––––––––––––––––––––––––– -->
         <link rel="stylesheet" href="css/normalize.css">
@@ -37,23 +34,20 @@
             </div>
         </div>
         <div class="row">
-            
         </div>
         <div class="row" id="ratio-evaluation">
         </div>
-        
         <div class="row" id="external-organization">
         </div>
-        
-        </div><!--End of container--> 
-        
-        
-        
+        <div class="row" id="contrib-organization">
+        </div>
+        </div><!--End of container-->
+
     <script src="./js/Chart.min.js"></script>
     <script>
         function render() {
-        var project = document.getElementsByName('txtProject')[0].value; 
-        if (project == '') { 
+        var project = document.getElementsByName('txtProject')[0].value;
+        if (project == '') {
             document.getElementsByName('txtProject')[0].value = 'expressjs/express';
             project = 'expressjs/express';
         }
@@ -78,7 +72,7 @@
                         samplesize = samplesize + 1;
                 } else {
                     labels.push(data[i].login);
-                    contribs.push(data[i].contributions);                
+                    contribs.push(data[i].contributions);
                 }
             }
             var myChart = new Chart(ctx, {
@@ -128,25 +122,33 @@
             var userlength = data.length;
             var calls = [];
             for (i = 0; i < labels.length; i++) {
-                var call = fetch('https://api.github.com/users/' + labels[i] + '/orgs')
-                calls.push(call);    
+                var call = new Promise((resolve, reject)  => {
+                    var user = labels[i];
+                    fetch('https://api.github.com/users/' + labels[i] + '/orgs')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.userid = user;
+                        resolve(data)
+                    });
+                });
+                calls.push(call);
             }
 
             Promise.all(calls).then(function (responses) {
                 // Get a JSON object from each of the responses
                 return Promise.all(responses.map(function (response) {
-                    return response.json();
+                    return response;
                 }));
             }).then(function (data) {
                 var info = processorgs(data);
-                document.getElementById("ratio-evaluation").innerHTML=`
+                document.getElementById("ratio-evaluation").innerHTML=`<br />
                 <h4><img src="${info[project.split('/')[0]].avatar_url} alt="${project.split('/')[0]}" style="width:32px; height:32px"/> 
-                Contributor Membership: ${info[project.split('/')[0]].count / 10 * 100}%</h4>
+                Contributor Membership Of Project Organization: ${info[project.split('/')[0]].count / 10 * 100}%</h4>
                 `
                 delete info[project.split('/')[0]];
                 var sortable = [];
                 for (var org in info) {
-                    sortable.push([org, info[org].count, info[org].avatar_url]);
+                    sortable.push([org, info[org].count, info[org].avatar_url, info[org].userids]);
                 }
                 sortable.sort(function(a, b) {
                     return b[1] - a[1];
@@ -155,49 +157,78 @@
 
                 while (externalrows[0]) {
                     externalrows[0].parentNode.removeChild(externalrows[0]);
-                } 
-                
-                var exorgs = '<h4 class="row external-organization-row">Contributors Aggregated by Organization</h4><div class="row" id="external-organization">';
-                    
-                    for(s=0; s < sortable.length; s++) {
-                    if(s % 6 == 0 && s !== 0) {
-                        exorgs += '</div><div class="row external-organization-row">';
-                    }
-                    exorgs += `<div class="one column" style="width:60px">
-                    <img src="${sortable[s][2]}" alt="${sortable[s][0]}" style="width:32px; height:32px"/> 
-                    <br/>${sortable[s][0] + '<br/>' + sortable[s][1]}
-                    </div>`
-
                 }
-                exorgs += '</div>';
+
+                var exorgs = `<h4 class="row external-organization-row">Contributors Related to Organizations</h4>
+                                <div class="row" id="external-organization">
+                                <table><thead>
+                                    <tr>
+                                    <th>Logo</th><th>Name</th><th>Contributors</th><th>Total</th>
+                                    </tr>
+                                </thead>
+                                `;
+                    for(s=0; s < sortable.length; s++) {
+                    exorgs += `<tr>
+                                <td><img src="${sortable[s][2]}" alt="${sortable[s][0]}" style="width:32px; height:32px"/></td>
+                                <td>${sortable[s][0]}</td>
+                                <td>${sortable[s][3]}</td>
+                                <td>${sortable[s][1]}</td>
+                                </tr>
+                    `
+                }
+                exorgs += '</table></div>';
                 document.getElementById("external-organization").outerHTML=exorgs;
-                
+
+                var contorgs = `<h4 class="row external-organization-row">Contributors Organizations</h4>
+                                <div class="row" id="contrib-organization">
+                                <table><thead>
+                                    <tr>
+                                    <th>Contributor</th><th>Organisation</th><th>Total</th>
+                                    </tr>
+                                </thead>
+                                `;
+                    for(s=0; s < data.length; s++) {
+                    contorgs += `<tr><td>${data[s].userid}</td><td>`;
+                    contcounter = 0
+                    for (t in data[s]) {
+                        if (data[s][t].login) {
+                            contcounter++;
+                            contorgs += `${data[s][t].login} `
+                        }
+                    }
+                    
+                    contorgs += `</td><td>${contcounter}</td></tr>`
+                }
+                contorgs += '</table></div>';
+                document.getElementById("contrib-organization").outerHTML=contorgs;
+
             }).catch(function (error) {
                 // if there's an error, log it
                 console.log(error);
             });
-        
     });
 }
     function processorgs(orgs) {
+        // console.log("ORGS: " + JSON.stringify(orgs));
         var retval = {};
         for(i = 0; i < orgs.length; i++){
             for(j = 0; j < orgs[i].length; j++) {
+                
                 if (retval[orgs[i][j].login]) {
                     retval[orgs[i][j].login].count = retval[orgs[i][j].login].count + 1
+                    retval[orgs[i][j].login].userids.push(orgs[i].userid)
                 } else {
-                    var org = { 
+                    var org = {
                         count : 1,
-                        avatar_url : orgs[i][j].avatar_url
+                        avatar_url : orgs[i][j].avatar_url,
+                        userids : [orgs[i].userid]
                     }
-                    retval[orgs[i][j].login] = org; 
+                    retval[orgs[i][j].login] = org;
                 }
             }
         }
         return retval;
     }
-
-        
         </script>
     </body>
 </html>
